@@ -13,6 +13,7 @@
         "laravel/framework": "5.7.*",
         "laravel/socialite": "^4.0",
         "laravel/tinker": "^1.0",
+        "predis/predis": "^1.1",
         "tymon/jwt-auth": "^1.0.0-rc.2"
     },
     "require-dev": {
