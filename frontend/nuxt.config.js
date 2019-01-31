@@ -1,88 +1,71 @@
-const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
-const pkg = require('./package')
+require('dotenv').config()
+
+const polyfills = [
+  'Promise',
+  'Object.assign',
+  'Object.values',
+  'Array.prototype.find',
+  'Array.prototype.findIndex',
+  'Array.prototype.includes',
+  'String.prototype.includes',
+  'String.prototype.startsWith',
+  'String.prototype.endsWith'
+]
 
 module.exports = {
-  mode: 'universal',
+  // mode: 'spa',
 
-  /*
-  ** Headers of the page
-  */
+  srcDir: __dirname,
+
+  env: {
+    apiUrl: process.env.APP_URL || 'http://api.bson.loc/api',
+    appName: process.env.APP_NAME || 'Laravel-Nuxt',
+    appLocale: process.env.APP_LOCALE || 'en',
+    githubAuth: !!process.env.GITHUB_CLIENT_ID
+  },
+
   head: {
-    title: pkg.name,
+    title: process.env.APP_NAME,
+    titleTemplate: '%s - ' + process.env.APP_NAME,
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: pkg.description }
+      { hid: 'description', name: 'description', content: 'Nuxt.js project' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      {
-        rel: 'stylesheet',
-        href:
-          'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons'
-      }
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+    ],
+    script: [
+      { src: `https://cdn.polyfill.io/v2/polyfill.min.js?features=${polyfills.join(',')}` }
     ]
   },
 
-  /*
-  ** Customize the progress-bar color
-  */
-  loading: { color: '#fff' },
+  loading: { color: '#007bff' },
 
-  /*
-  ** Global CSS
-  */
-  css: [
-    '~/assets/style/app.styl'
-  ],
-
-  /*
-  ** Plugins to load before mounting the App
-  */
-  plugins: [
-    '@/plugins/vuetify'
-  ],
-
-  /*
-  ** Nuxt.js modules
-  */
-  modules: [
-    // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios',
-    '@nuxtjs/pwa'
-  ],
-  /*
-  ** Axios module configuration
-  */
-  axios: {
-    // See https://github.com/nuxt-community/axios-module#options
+  router: {
+    middleware: ['locale', 'check-auth']
   },
 
-  /*
-  ** Build configuration
-  */
-  build: {
-    transpile: ['vuetify/lib'],
-    plugins: [new VuetifyLoaderPlugin()],
-    loaders: {
-      stylus: {
-        import: ['~assets/style/variables.styl']
-      }
-    },
+  css: [
+    { src: '~assets/sass/app.scss', lang: 'scss' }
+  ],
 
-    /*
-    ** You can extend webpack config here
-    */
-    extend(config, ctx) {
-      // Run ESLint on save
-      if (ctx.isDev && ctx.isClient) {
-        config.module.rules.push({
-          enforce: 'pre',
-          test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
-          exclude: /(node_modules)/
-        })
-      }
-    }
+  plugins: [
+    '~components/global',
+    '~plugins/i18n',
+    '~plugins/vform',
+    '~plugins/axios',
+    '~plugins/fontawesome',
+    // '~plugins/nuxt-client-init',
+    { src: '~plugins/bootstrap', ssr: false }
+  ],
+
+  modules: [
+    '@nuxtjs/router',
+    '~/modules/spa'
+  ],
+
+  build: {
+    extractCSS: true
   }
 }
