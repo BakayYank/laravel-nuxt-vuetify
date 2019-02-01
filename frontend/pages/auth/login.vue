@@ -1,106 +1,103 @@
 <template>
-  <div class="row">
-    <div class="col-lg-8 m-auto">
-      <card :title="$t('login')">
+  <v-layout row>
+    <v-flex xs12 sm8 offset-sm2 lg4 offset-lg4>
+      <v-card>
+        <progress-bar :show="busy"></progress-bar>
         <form @submit.prevent="login" @keydown="form.onKeydown($event)">
-          <!-- Email -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('email') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.email"
-                :class="{ 'is-invalid': form.errors.has('email') }"
-                type="email"
-                name="email"
-                class="form-control"
-              >
-              <has-error :form="form" field="email" />
-            </div>
-          </div>
+          <v-card-title primary-title>
+            <h3 class="headline mb-0">{{ $t('login') }}</h3>
+          </v-card-title>
+          <v-card-text>
 
-          <!-- Password -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('password') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.password"
-                :class="{ 'is-invalid': form.errors.has('password') }"
-                type="password"
-                name="password"
-                class="form-control"
-              >
-              <has-error :form="form" field="password" />
-            </div>
-          </div>
+            <!-- Email -->
+            <email-input
+                    :form="form"
+                    :label="$t('email')"
+                    :v-errors="errors"
+                    :value.sync="form.email"
+                    name="email"
+                    prepend="person_outline"
+                    v-validate="'required|email'"
+            ></email-input>
 
-          <!-- Remember Me -->
-          <div class="form-group row">
-            <div class="col-md-3" />
-            <div class="col-md-7 d-flex">
-              <checkbox v-model="remember" name="remember">
-                {{ $t('remember_me') }}
-              </checkbox>
+            <!-- Password -->
+            <password-input
+                    :label="$t('password')"
+                    :v-errors="errors"
+                    :form="form"
+                    :value.sync="form.password"
+                    prepend="lock_outline"
+                    v-validate="'required|min:8'"
+            ></password-input>
 
-              <router-link :to="{ name: 'password.request' }" class="small ml-auto my-auto">
-                {{ $t('forgot_password') }}
-              </router-link>
-            </div>
-          </div>
+            <!-- Remember Me -->
+            <v-checkbox
+                    :label="$t('remember_me')"
+                    color="primary"
+                    type="checkbox"
+                    v-model="remember"
+                    value="true"
+            ></v-checkbox>
 
-          <div class="form-group row">
-            <div class="col-md-7 offset-md-3 d-flex">
-              <!-- Submit Button -->
-              <v-button :loading="form.busy">
-                {{ $t('login') }}
-              </v-button>
+            <submit-button :block="true" :form="form" :label="$t('login')"></submit-button>
 
-              <!-- GitHub Login Button -->
-              <login-with-github />
-            </div>
-          </div>
+          </v-card-text>
+          <v-card-actions>
+            <router-link :to="{ name: 'register' }">
+              {{ $t('register') }}
+            </router-link>
+            <v-spacer></v-spacer>
+            <router-link :to="{ name: 'password.request' }">
+              {{ $t('forgot_password') }}
+            </router-link>
+          </v-card-actions>
         </form>
-      </card>
-    </div>
-  </div>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 
+
 <script>
-import Form from 'vform'
+  import Form from 'vform'
 
-export default {
-  head() {
-    return { title: this.$t('login') }
-  },
-
-  data: () => ({
-    form: new Form({
-      email: '',
-      password: ''
+  export default {
+    layout: 'app',
+    name: 'login-view',
+    metaInfo () {
+      return { title: this.$t('login') }
+    },
+    data: () => ({
+      form: new Form({
+        email: '',
+        password: ''
+      }),
+      eye: true,
+      remember: false,
+      busy: false
     }),
-    remember: false
-  }),
 
-  methods: {
-    async login() {
-      // Submit the form.
-      const { data } = await this.form.post('/login')
+    methods: {
+      async login () {
 
-      // Save the token.
-      this.$store.dispatch('auth/saveToken', {
-        token: data.token,
-        remember: this.remember
-      })
+        if (await this.formHasErrors()) return
 
-      // Fetch the user.
-      await this.$store.dispatch('auth/fetchUser')
 
-      // Redirect home.
-      this.$router.push({ name: 'home' })
+        // Submit the form.
+        const { data } = await this.form.post('/login')
+
+        // Save the token.
+        this.$store.dispatch('auth/saveToken', {
+          token: data.token,
+          remember: this.remember
+        })
+        this.busy = true
+        // Fetch the user.
+        await this.$store.dispatch('auth/fetchUser')
+
+        // Redirect home.
+        this.$router.push({ name: 'home' })
+      }
     }
   }
-}
 </script>

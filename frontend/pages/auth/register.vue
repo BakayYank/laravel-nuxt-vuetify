@@ -1,127 +1,114 @@
 <template>
-  <div class="row">
-    <div class="col-lg-8 m-auto">
-      <card :title="$t('register')">
+  <v-layout row>
+    <v-flex xs12 sm8 offset-sm2 lg4 offset-lg4>
+      <v-card>
+        <progress-bar :show="form.busy"></progress-bar>
         <form @submit.prevent="register" @keydown="form.onKeydown($event)">
-          <!-- Name -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('name') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.name"
-                :class="{ 'is-invalid': form.errors.has('name') }"
-                type="text"
-                name="name"
-                class="form-control"
-              >
-              <has-error :form="form" field="name" />
-            </div>
-          </div>
+          <v-card-title primary-title>
+            <h3 class="headline mb-0">{{ $t('register') }}</h3>
+          </v-card-title>
+          <v-card-text>
 
-          <!-- Email -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('email') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.email"
-                :class="{ 'is-invalid': form.errors.has('email') }"
-                type="email"
-                name="email"
-                class="form-control"
-              >
-              <has-error :form="form" field="email" />
-            </div>
-          </div>
+            <!-- Name -->
+            <text-input
+                    :form="form"
+                    :label="$t('name')"
+                    :v-errors="errors"
+                    :value.sync="form.name"
+                    browser-autocomplete="name"
+                    counter="30"
+                    name="name"
+                    v-validate="'required|max:30'"
+            ></text-input>
 
-          <!-- Password -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('password') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.password"
-                :class="{ 'is-invalid': form.errors.has('password') }"
-                type="password"
-                name="password"
-                class="form-control"
-              >
-              <has-error :form="form" field="password" />
-            </div>
-          </div>
+            <!-- Email -->
+            <email-input
+                    :form="form"
+                    :label="$t('email')"
+                    :v-errors="errors"
+                    :value.sync="form.email"
+                    name="email"
+                    v-validate="'required|email'"
+            ></email-input>
 
-          <!-- Password Confirmation -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('confirm_password') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.password_confirmation"
-                :class="{ 'is-invalid': form.errors.has('password_confirmation') }"
-                type="password"
-                name="password_confirmation"
-                class="form-control"
-              >
-              <has-error :form="form" field="password_confirmation" />
-            </div>
-          </div>
+            <!-- Password -->
+            <password-input
+                    ref="password"
+                    :form="form"
+                    :hint="$t('password_length_hint')"
+                    :label="$t('password')"
+                    :v-errors="errors"
+                    :value.sync="form.password"
+                    browser-autocomplete="new-password"
+                    v-on:eye="eye = $event"
+                    name="password"
+                    v-validate="'required|min:8'"
+            ></password-input>
 
-          <div class="form-group row">
-            <div class="col-md-7 offset-md-3 d-flex">
-              <!-- Submit Button -->
-              <v-button :loading="form.busy">
-                {{ $t('register') }}
-              </v-button>
+            <!-- Password Confirmation -->
+            <password-input
+                    :form="form"
+                    :hide="eye"
+                    :label="$t('confirm_password')"
+                    :v-errors="errors"
+                    :value.sync="form.password_confirmation"
+                    browser-autocomplete="new-password"
+                    data-vv-as="password"
+                    hide-icon="true"
+                    name="password_confirmation"
+                    v-validate="'required|confirmed:password'"
+            ></password-input>
 
-              <!-- GitHub Login Button -->
-              <login-with-github />
-            </div>
-          </div>
+          </v-card-text>
+
+          <v-card-actions>
+            <submit-button :form="form" :label="$t('register')"></submit-button>
+          </v-card-actions>
         </form>
-      </card>
-    </div>
-  </div>
+      </v-card>
+    </v-flex>
+  </v-layout>
+
 </template>
-
 <script>
-import Form from 'vform'
+  import Form from 'vform'
 
-export default {
-  head() {
-    return { title: this.$t('register') }
-  },
+  export default {
+    layout: 'app',
+    name: 'register-view',
+    metaInfo () {
+      return { title: this.$t('register') }
+    },
 
-  data: () => ({
-    form: new Form({
-      name: '',
-      email: '',
-      password: '',
-      password_confirmation: ''
-    })
-  }),
+    data: () => ({
+      form: new Form({
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: ''
+      }),
+      eye: true
+    }),
 
-  methods: {
-    async register() {
-      // Register the user.
-      const { data } = await this.form.post('/register')
+    methods: {
+      async register () {
+        if (await this.formHasErrors()) return
 
-      // Log in the user.
-      const { data: { token } } = await this.form.post('/login')
+        // Register the user.
+        const { data } = await this.form.post('/register')
 
-      // Save the token.
-      this.$store.dispatch('auth/saveToken', { token })
+        // Log in the user.
+        const { data: { token }} = await this.form.post('/login')
 
-      // Update the user.
-      await this.$store.dispatch('auth/updateUser', { user: data })
+        // Save the token.
+        this.$store.dispatch('auth/saveToken', { token })
 
-      // Redirect home.
-      this.$router.push({ name: 'home' })
+        // Update the user.
+        await this.$store.dispatch('auth/updateUser', { user: data })
+
+        // Redirect home.
+        this.$router.push({ name: 'home' })
+      }
     }
   }
-}
 </script>

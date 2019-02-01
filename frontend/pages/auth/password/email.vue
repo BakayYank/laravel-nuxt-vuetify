@@ -1,64 +1,63 @@
 <template>
-  <div class="row">
-    <div class="col-lg-8 m-auto">
-      <card :title="$t('reset_password')">
+  <v-layout row>
+    <v-flex xs12 sm8 offset-sm2 lg4 offset-lg4>
+      <v-card>
+        <progress-bar :show="form.busy"></progress-bar>
         <form @submit.prevent="send" @keydown="form.onKeydown($event)">
-          <alert-success :form="form" :message="status" />
+          <v-card-title primary-title>
+            <h3 class="headline mb-0">{{ $t('reset_password') }}</h3>
+          </v-card-title>
+          <v-card-text>
 
-          <!-- Email -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('email') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.email"
-                :class="{ 'is-invalid': form.errors.has('email') }"
-                type="email"
-                name="email"
-                class="form-control"
-              >
-              <has-error :form="form" field="email" />
-            </div>
-          </div>
+            <!-- Email -->
+            <email-input
+                    :form="form"
+                    :label="$t('email')"
+                    :v-errors="errors"
+                    :value.sync="form.email"
+                    name="email"
+                    v-validate="'required|email'"
+            ></email-input>
 
-          <!-- Submit Button -->
-          <div class="form-group row">
-            <div class="col-md-9 ml-md-auto">
-              <v-button :loading="form.busy">
-                {{ $t('send_password_reset_link') }}
-              </v-button>
-            </div>
-          </div>
+          </v-card-text>
+          <v-card-actions>
+            <submit-button :flat="true" :form="form" :label="$t('send_password_reset_link')"></submit-button>
+          </v-card-actions>
         </form>
-      </card>
-    </div>
-  </div>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
-import Form from 'vform'
+  import Form from 'vform'
 
-export default {
-  head() {
-    return { title: this.$t('reset_password') }
-  },
+  export default {
+    name: 'email-view',
+    layout: 'app',
+    metaInfo () {
+      return { title: this.$t('reset_password') }
+    },
 
-  data: () => ({
-    status: '',
-    form: new Form({
-      email: ''
-    })
-  }),
+    data: () => ({
+      form: new Form({
+        email: ''
+      })
+    }),
 
-  methods: {
-    async send() {
-      const { data } = await this.form.post('/password/email')
+    methods: {
+      async send () {
+        if (await this.formHasErrors()) return
 
-      this.status = data.status
+        const { data } = await this.form.post('/password/email')
 
-      this.form.reset()
+        this.$store.dispatch('message/responseMessage', {
+          type: 'success',
+          text: data.status
+        })
+
+        this.$router.push({ name: 'welcome' })
+      }
     }
   }
-}
 </script>

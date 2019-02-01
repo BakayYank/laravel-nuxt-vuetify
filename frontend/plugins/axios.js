@@ -1,5 +1,4 @@
 import axios from 'axios'
-import swal from 'sweetalert2'
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
@@ -11,13 +10,13 @@ export default ({ app, store, redirect }) => {
   }
 
   // Request interceptor
-  axios.interceptors.request.use((request) => {
+  axios.interceptors.request.use(request => {
     request.baseURL = process.env.apiUrl
 
     const token = store.getters['auth/token']
 
     if (token) {
-      request.headers.common.Authorization = `Bearer ${token}`
+      request.headers.common['Authorization'] = `Bearer ${token}`
     }
 
     const locale = store.getters['lang/locale']
@@ -29,33 +28,31 @@ export default ({ app, store, redirect }) => {
   })
 
   // Response interceptor
-  axios.interceptors.response.use(response => response, (error) => {
+  axios.interceptors.response.use(response => response, error => {
     const { status } = error.response || {}
 
     if (status >= 500) {
-      swal({
+      store.dispatch('message/responseMessage', {
         type: 'error',
-        title: app.i18n.t('error_alert_title'),
-        text: app.i18n.t('error_alert_text'),
-        reverseButtons: true,
-        confirmButtonText: app.i18n.t('ok'),
-        cancelButtonText: app.i18n.t('cancel')
+        text:  app.i18n.t('error_alert_text'),
+        title:  app.i18n.t('error_alert_title'),
+        modal: true
       })
     }
 
-    if (status === 401 && store.getters['auth/check']) {
-      swal({
-        type: 'warning',
-        title: app.i18n.t('token_expired_alert_title'),
-        text: app.i18n.t('token_expired_alert_text'),
-        reverseButtons: true,
-        confirmButtonText: app.i18n.t('ok'),
-        cancelButtonText: app.i18n.t('cancel')
-      }).then(() => {
-        store.commit('auth/LOGOUT')
 
-        redirect({ name: 'login' })
+    if (status === 401 && store.getters['auth/check']) {
+      store.dispatch('message/responseMessage', {
+        type: 'warning',
+        text: app.i18n.t('token_expired_alert_text'),
+        title: app.i18n.t('token_expired_alert_title'),
+        modal: true
       })
+          .then(async () => {
+            await store.dispatch('auth/LOGOUT')
+
+            router.push({ name: 'login' })
+          })
     }
 
     return Promise.reject(error)

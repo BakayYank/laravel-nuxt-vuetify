@@ -1,3 +1,4 @@
+
 require('dotenv').config()
 
 const polyfills = [
@@ -13,7 +14,7 @@ const polyfills = [
 ]
 
 module.exports = {
-  // mode: 'spa',
+  mode: 'universal',
 
   srcDir: __dirname,
 
@@ -36,7 +37,7 @@ module.exports = {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ],
     script: [
-      { src: `https://cdn.polyfill.io/v2/polyfill.min.js?features=${polyfills.join(',')}` }
+
     ]
   },
 
@@ -46,26 +47,44 @@ module.exports = {
     middleware: ['locale', 'check-auth']
   },
 
+  /*
   css: [
-    { src: '~assets/sass/app.scss', lang: 'scss' }
+    // { src: '~assets/sass/app.scss', lang: 'scss' }
   ],
+*/
 
+  css: [
+
+  ],
   plugins: [
-    '~components/global',
+    '~components',
     '~plugins/i18n',
     '~plugins/vform',
     '~plugins/axios',
     '~plugins/fontawesome',
+    '~plugins/validation',
+    // '@/plugins/vuetify'
     // '~plugins/nuxt-client-init',
-    { src: '~plugins/bootstrap', ssr: false }
+    // { src: '~plugins/bootstrap', ssr: false }
   ],
 
   modules: [
+    //'~/modules/spa',
     '@nuxtjs/router',
-    '~/modules/spa'
+    '@nuxtjs/pwa',
+    '@nuxtjs/vuetify',
+    '@nuxtjs/font-awesome',
+    'nuxt-material-design-icons'
   ],
 
+  vuetify: {
+    materialIcons: false,
+    // Vuetify options
+    //  theme: { }
+  },
+
   build: {
+
     extractCSS: true
   }
 }

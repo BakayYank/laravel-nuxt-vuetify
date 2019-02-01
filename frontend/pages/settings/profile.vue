@@ -1,89 +1,81 @@
 <template>
-  <card :title="$t('your_info')">
+  <v-card flat>
     <form @submit.prevent="update" @keydown="form.onKeydown($event)">
-      <alert-success :form="form" :message="$t('info_updated')" />
+      <v-card-title primary-title>
+        <h5 class="subheading mb-0">{{ $t('your_info') }}</h5>
+      </v-card-title>
+      <v-card-text>
 
-      <!-- Name -->
-      <div class="form-group row">
-        <label class="col-md-3 col-form-label text-md-right">
-          {{ $t('name') }}
-        </label>
-        <div class="col-md-7">
-          <input
-            v-model="form.name"
-            :class="{ 'is-invalid': form.errors.has('name') }"
-            type="text"
-            name="name"
-            class="form-control"
-          >
-          <has-error :form="form" field="name" />
-        </div>
-      </div>
+        <!-- Name -->
+        <text-input
+                :form="form"
+                :label="$t('name')"
+                :v-errors="errors"
+                :value.sync="form.name"
+                counter="30"
+                name="name"
+                v-validate="'required|max:30'"
+        ></text-input>
 
-      <!-- Email -->
-      <div class="form-group row">
-        <label class="col-md-3 col-form-label text-md-right">
-          {{ $t('email') }}
-        </label>
-        <div class="col-md-7">
-          <input
-            v-model="form.email"
-            :class="{ 'is-invalid': form.errors.has('email') }"
-            type="email"
-            name="email"
-            class="form-control"
-          >
-          <has-error :form="form" field="email" />
-        </div>
-      </div>
+        <!-- Email -->
+        <email-input
+                :form="form"
+                :label="$t('email')"
+                :v-errors="errors"
+                :value.sync="form.email"
+                name="email"
+                v-validate="'required|email'"
+        ></email-input>
 
-      <!-- Submit Button -->
-      <div class="form-group row">
-        <div class="col-md-9 ml-md-auto">
-          <v-button :loading="form.busy" type="success">
-            {{ $t('update') }}
-          </v-button>
-        </div>
-      </div>
+      </v-card-text>
+      <v-card-actions>
+        <submit-button :flat="true" :form="form" :label="$t('update')"></submit-button>
+      </v-card-actions>
     </form>
-  </card>
+  </v-card>
 </template>
 
 <script>
-import Form from 'vform'
-import { mapGetters } from 'vuex'
+  import Form from 'vform'
+  import { mapGetters } from 'vuex'
 
-export default {
-  scrollToTop: false,
+  export default {
+    name: 'profile-view',
+    data: () => ({
+      form: new Form({
+        name: '',
+        email: ''
+      })
+    }),
 
-  head() {
-    return { title: this.$t('settings') }
-  },
+    computed: mapGetters({
+      user: 'auth/user'
+    }),
 
-  data: () => ({
-    form: new Form({
-      name: '',
-      email: ''
-    })
-  }),
+    created () {
+      // Fill the form with user data.
+      this.form.keys().forEach(key => {
+        this.form[key] = this.user[key]
+      })
+    },
 
-  computed: mapGetters({
-    user: 'auth/user'
-  }),
+    methods: {
+      async update () {
+        if (await this.formHasErrors()) return
 
-  created() {
-    // Fill the form with user data.
-    this.form.keys().forEach((key) => {
-      this.form[key] = this.user[key]
-    })
-  },
+        this.$emit('busy', true)
 
-  methods: {
-    async update() {
-      const { data } = await this.form.patch('/settings/profile')
+        const { data } = await this.form.patch('/settings/profile')
 
-      this.$store.dispatch('auth/updateUser', { user: data })
+        await this.$store.dispatch('auth/updateUser', { user: data })
+        this.$emit('busy', false)
+
+        this.$store.dispatch('message/responseMessage', {
+          type: 'success',
+          text: this.$t('info_updated')
+        })
+      }
     }
   }
-}
 </script>
+

@@ -1,77 +1,75 @@
 <template>
-  <card :title="$t('your_password')">
+  <v-card flat>
     <form @submit.prevent="update" @keydown="form.onKeydown($event)">
-      <alert-success :form="form" :message="$t('password_updated')" />
+      <v-card-title primary-title>
+        <h5 class="subheading mb-0">{{ $t('your_password') }}</h5>
+      </v-card-title>
+      <v-card-text>
 
-      <!-- Password -->
-      <div class="form-group row">
-        <label class="col-md-3 col-form-label text-md-right">
-          {{ $t('new_password') }}
-        </label>
-        <div class="col-md-7">
-          <input
-            v-model="form.password"
-            :class="{ 'is-invalid': form.errors.has('password') }"
-            type="password"
-            name="password"
-            class="form-control"
-          >
-          <has-error :form="form" field="password" />
-        </div>
-      </div>
+        <!-- Password -->
+        <password-input
+                ref="password"
+                :label="$t('password')"
+                :form="form"
+                :hint="$t('password_length_hint')"
+                :v-errors="errors"
+                :value.sync="form.password"
+                v-on:eye="eye = $event"
+                v-validate="'required|min:8'"
+        ></password-input>
 
-      <!-- Password Confirmation -->
-      <div class="form-group row">
-        <label class="col-md-3 col-form-label text-md-right">
-          {{ $t('confirm_password') }}
-        </label>
-        <div class="col-md-7">
-          <input
-            v-model="form.password_confirmation"
-            :class="{ 'is-invalid': form.errors.has('password_confirmation') }"
-            type="password"
-            name="password_confirmation"
-            class="form-control"
-          >
-          <has-error :form="form" field="password_confirmation" />
-        </div>
-      </div>
+        <!-- Password Confirmation -->
+        <password-input
+                :form="form"
+                :hide="eye"
+                :label="$t('confirm_password')"
+                :v-errors="errors"
+                :value.sync="form.password_confirmation"
+                data-vv-as="password"
+                hide-icon="true"
+                name="password_confirmation"
+                v-validate="'required|confirmed:password'"
+        ></password-input>
 
-      <!-- Submit Button -->
-      <div class="form-group row">
-        <div class="col-md-9 ml-md-auto">
-          <v-button :loading="form.busy" type="success">
-            {{ $t('update') }}
-          </v-button>
-        </div>
-      </div>
+        <!-- <form-feedback :form="form" :text="$t('password_updated')"></form-feedback> -->
+
+      </v-card-text>
+      <v-card-actions>
+        <submit-button :flat="true" :form="form" :label="$t('update')"></submit-button>
+      </v-card-actions>
     </form>
-  </card>
+  </v-card>
 </template>
 
 <script>
-import Form from 'vform'
+  import Form from 'vform'
 
-export default {
-  scrollToTop: false,
+  export default {
+    name: 'password-view',
+    data: () => ({
+      form: new Form({
+        password: '',
+        password_confirmation: ''
+      }),
+      eye: true
+    }),
 
-  head() {
-    return { title: this.$t('settings') }
-  },
+    methods: {
+      async update () {
+        if (await this.formHasErrors()) return
 
-  data: () => ({
-    form: new Form({
-      password: '',
-      password_confirmation: ''
-    })
-  }),
+        this.$emit('busy', true)
 
-  methods: {
-    async update() {
-      await this.form.patch('/settings/password')
+        await this.form.patch('/settings/password')
 
-      this.form.reset()
+        this.form.reset()
+        this.$emit('busy', false)
+
+        this.$store.dispatch('message/responseMessage', {
+          type: 'success',
+          text: this.$t('password_updated')
+        })
+      }
     }
   }
-}
 </script>

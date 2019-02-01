@@ -1,107 +1,105 @@
 <template>
-  <div class="row">
-    <div class="col-lg-8 m-auto">
-      <card :title="$t('reset_password')">
+  <v-layout row>
+    <v-flex xs12 sm8 offset-sm2 lg4 offset-lg4>
+      <v-card>
+        <progress-bar :show="form.busy"></progress-bar>
         <form @submit.prevent="reset" @keydown="form.onKeydown($event)">
-          <alert-success :form="form" :message="status" />
+          <v-card-title primary-title>
+            <h3 class="headline mb-0">{{ $t('reset_password') }}</h3>
+          </v-card-title>
+          <v-card-text>
 
-          <!-- Email -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('email') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.email"
-                :class="{ 'is-invalid': form.errors.has('email') }"
-                type="email"
-                name="email"
-                class="form-control"
-                readonly
-              >
-              <has-error :form="form" field="email" />
-            </div>
-          </div>
+            <!-- Email -->
+            <email-input
+                    :form="form"
+                    :label="$t('email')"
+                    :v-errors="errors"
+                    :value.sync="form.email"
+                    name="email"
+                    v-validate="'required|email'"
+            ></email-input>
 
-          <!-- Password -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('password') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.password"
-                :class="{ 'is-invalid': form.errors.has('password') }"
-                type="password"
-                name="password"
-                class="form-control"
-              >
-              <has-error :form="form" field="password" />
-            </div>
-          </div>
+            <!-- Password -->
+            <password-input
+                    :form="form"
+                    :hint="$t('password_length_hint')"
+                    :v-errors="errors"
+                    :value.sync="form.password"
+                    v-on:eye="eye = $event"
+                    v-validate="'required|min:8'"
+            ></password-input>
 
-          <!-- Password Confirmation -->
-          <div class="form-group row">
-            <label class="col-md-3 col-form-label text-md-right">
-              {{ $t('confirm_password') }}
-            </label>
-            <div class="col-md-7">
-              <input
-                v-model="form.password_confirmation"
-                :class="{ 'is-invalid': form.errors.has('password_confirmation') }"
-                type="password"
-                name="password_confirmation"
-                class="form-control"
-              >
-              <has-error :form="form" field="password_confirmation" />
-            </div>
-          </div>
+            <!-- Password Confirmation -->
+            <password-input
+                    :form="form"
+                    :hide="eye"
+                    :label="$t('confirm_password')"
+                    :v-errors="errors"
+                    :value.sync="form.password_confirmation"
+                    data-vv-as="password"
+                    hide-icon="true"
+                    name="password_confirmation"
+                    v-validate="'required|confirmed:password'"
+            ></password-input>
 
-          <!-- Submit Button -->
-          <div class="form-group row">
-            <div class="col-md-9 ml-md-auto">
-              <v-button :loading="form.busy">
-                {{ $t('reset_password') }}
-              </v-button>
-            </div>
-          </div>
+          </v-card-text>
+          <v-card-actions>
+            <submit-button :flat="true" :form="form" :label="$t('reset_password')"></submit-button>
+          </v-card-actions>
         </form>
-      </card>
-    </div>
-  </div>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
-import Form from 'vform'
+  import Form from 'vform'
 
-export default {
-  head() {
-    return { title: this.$t('reset_password') }
-  },
+  export default {
+    name: 'reset-view',
+    layout: 'app',
+    metaInfo () {
+      return { title: this.$t('reset_password') }
+    },
 
-  data: () => ({
-    status: '',
-    form: new Form({
-      token: '',
-      email: '',
-      password: '',
-      password_confirmation: ''
-    })
-  }),
+    data: () => ({
+      form: new Form({
+        token: '',
+        email: '',
+        password: '',
+        password_confirmation: ''
+      }),
+      eye: true
+    }),
 
-  created() {
-    this.form.email = this.$route.query.email
-    this.form.token = this.$route.params.token
-  },
+    methods: {
+      async reset () {
+        if (await this.formHasErrors()) return
 
-  methods: {
-    async reset() {
-      const { data } = await this.form.post('/password/reset')
+        this.form.token = this.$route.params.token
 
-      this.status = data.status
+        const response = await this.form.post('/password/reset')
 
-      this.form.reset()
+        // Login user if reset successful.
+        const { data } = await this.form.post('/login')
+
+        // Save the token.
+        this.$store.dispatch('auth/saveToken', {
+          token: data.token,
+          remember: false
+        })
+
+        // Fetch the user.
+        await this.$store.dispatch('auth/fetchUser')
+
+        this.$store.dispatch('message/responseMessage', {
+          type: 'success',
+          text: response.data.status
+        })
+
+        // Redirect home.
+        this.$router.push({ name: 'home' })
+      }
     }
   }
-}
 </script>
