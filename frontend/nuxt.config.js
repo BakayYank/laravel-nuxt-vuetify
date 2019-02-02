@@ -1,17 +1,4 @@
-
 require('dotenv').config()
-
-const polyfills = [
-  'Promise',
-  'Object.assign',
-  'Object.values',
-  'Array.prototype.find',
-  'Array.prototype.findIndex',
-  'Array.prototype.includes',
-  'String.prototype.includes',
-  'String.prototype.startsWith',
-  'String.prototype.endsWith'
-]
 
 module.exports = {
   mode: 'universal',
@@ -36,9 +23,7 @@ module.exports = {
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ],
-    script: [
-
-    ]
+    script: []
   },
 
   loading: { color: '#007bff' },
@@ -48,43 +33,49 @@ module.exports = {
   },
 
   /*
-  css: [
-    // { src: '~assets/sass/app.scss', lang: 'scss' }
-  ],
-*/
+    css: [
+      // { src: '~assets/sass/app.scss', lang: 'scss' }
+    ],
+  */
 
-  css: [
-
-  ],
+  css: [],
   plugins: [
     '~components',
     '~plugins/i18n',
     '~plugins/vform',
     '~plugins/axios',
-    '~plugins/fontawesome',
-    '~plugins/validation',
-    // '@/plugins/vuetify'
-    // '~plugins/nuxt-client-init',
-    // { src: '~plugins/bootstrap', ssr: false }
+    '~plugins/validation'
   ],
 
   modules: [
-    //'~/modules/spa',
     '@nuxtjs/router',
-    '@nuxtjs/pwa',
+    // '@nuxtjs/pwa',
     '@nuxtjs/vuetify',
     '@nuxtjs/font-awesome',
     'nuxt-material-design-icons'
   ],
 
   vuetify: {
-    materialIcons: false,
+    materialIcons: false
     // Vuetify options
     //  theme: { }
   },
 
   build: {
-
-    extractCSS: true
+    extractCSS: true,
+    /*
+    ** You can extend webpack config here
+    */
+    extend(config, ctx) {
+      // Run ESLint on save
+      if (ctx.isDev && ctx.isClient) {
+        config.module.rules.push({
+          enforce: 'pre',
+          test: /\.(js|vue)$/,
+          loader: 'eslint-loader',
+          exclude: /(node_modules)/
+        })
+      }
+    }
   }
 }

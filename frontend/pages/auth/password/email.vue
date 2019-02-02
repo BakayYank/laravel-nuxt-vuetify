@@ -2,26 +2,26 @@
   <v-layout row>
     <v-flex xs12 sm8 offset-sm2 lg4 offset-lg4>
       <v-card>
-        <progress-bar :show="form.busy"></progress-bar>
+        <progress-bar :show="form.busy" />
         <form @submit.prevent="send" @keydown="form.onKeydown($event)">
           <v-card-title primary-title>
-            <h3 class="headline mb-0">{{ $t('reset_password') }}</h3>
+            <h3 class="headline mb-0">
+              {{ $t('reset_password') }}
+            </h3>
           </v-card-title>
           <v-card-text>
-
             <!-- Email -->
             <email-input
-                    :form="form"
-                    :label="$t('email')"
-                    :v-errors="errors"
-                    :value.sync="form.email"
-                    name="email"
-                    v-validate="'required|email'"
-            ></email-input>
-
+              v-validate="'required|email'"
+              :form="form"
+              :label="$t('email')"
+              :v-errors="errors"
+              :value.sync="form.email"
+              name="email"
+            />
           </v-card-text>
           <v-card-actions>
-            <submit-button :flat="true" :form="form" :label="$t('send_password_reset_link')"></submit-button>
+            <submit-button :flat="true" :form="form" :label="$t('send_password_reset_link')" />
           </v-card-actions>
         </form>
       </v-card>
@@ -30,34 +30,34 @@
 </template>
 
 <script>
-  import Form from 'vform'
+import Form from 'vform'
 
-  export default {
-    name: 'email-view',
-    layout: 'app',
-    metaInfo () {
-      return { title: this.$t('reset_password') }
-    },
+export default {
+  name: 'EmailView',
+  layout: 'app',
+  metaInfo() {
+    return { title: this.$t('reset_password') }
+  },
 
-    data: () => ({
-      form: new Form({
-        email: ''
+  data: () => ({
+    form: new Form({
+      email: ''
+    })
+  }),
+
+  methods: {
+    async send() {
+      if (await this.formHasErrors()) return
+
+      const { data } = await this.form.post('/password/email')
+
+      this.$store.dispatch('message/responseMessage', {
+        type: 'success',
+        text: data.status
       })
-    }),
 
-    methods: {
-      async send () {
-        if (await this.formHasErrors()) return
-
-        const { data } = await this.form.post('/password/email')
-
-        this.$store.dispatch('message/responseMessage', {
-          type: 'success',
-          text: data.status
-        })
-
-        this.$router.push({ name: 'welcome' })
-      }
+      this.$router.push({ name: 'welcome' })
     }
   }
+}
 </script>

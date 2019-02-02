@@ -5,6 +5,7 @@ import { scrollBehavior } from '~/utils'
 Vue.use(Router)
 
 const Home = () => import('~/pages/home').then(m => m.default || m)
+const Index = () => import('~/pages/index').then(m => m.default || m)
 const Welcome = () => import('~/pages/welcome').then(m => m.default || m)
 
 const Login = () => import('~/pages/auth/login').then(m => m.default || m)
@@ -17,7 +18,8 @@ const SettingsProfile = () => import('~/pages/settings/profile').then(m => m.def
 const SettingsPassword = () => import('~/pages/settings/password').then(m => m.default || m)
 
 const routes = [
-  { path: '/', name: 'welcome', component: Welcome },
+  { path: '/', name: 'index', component: Index },
+  { path: '/welcome', name: 'welcome', component: Welcome },
   { path: '/home', name: 'home', component: Home },
 
   { path: '/login', name: 'login', component: Login },

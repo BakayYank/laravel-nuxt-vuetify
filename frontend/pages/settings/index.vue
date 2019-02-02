@@ -2,14 +2,16 @@
   <v-layout row>
     <v-flex xs12 sm8 offset-sm2 lg4 offset-lg4>
       <v-card>
-        <progress-bar :show="busy"></progress-bar>
+        <progress-bar :show="busy" />
         <v-card-title primary-title class="grey lighten-4">
-          <h3 class="headline mb-0">{{ $t('settings') }}</h3>
+          <h3 class="headline mb-0">
+            {{ $t('settings') }}
+          </h3>
         </v-card-title>
-        <v-divider></v-divider>
+        <v-divider />
 
         <v-tabs icons-and-text centered fixed>
-          <v-tabs-slider color="primary"></v-tabs-slider>
+          <v-tabs-slider color="primary" />
 
           <v-tab href="#tab-person">
             {{ $t('profile') }}
@@ -21,12 +23,11 @@
           </v-tab>
 
           <v-tab-item id="tab-person">
-            <profile-view v-on:busy="busy = $event"></profile-view>
+            <profile-view @busy="busy = $event" />
           </v-tab-item>
           <v-tab-item id="tab-password">
-            <password-view v-on:busy="busy = $event"></password-view>
+            <password-view @busy="busy = $event" />
           </v-tab-item>
-
         </v-tabs>
       </v-card>
     </v-flex>
@@ -34,20 +35,20 @@
 </template>
 
 <script>
-  import Profile from '~/pages/settings/profile'
-  import Password from '~/pages/settings/password'
+import Profile from '~/pages/settings/profile'
+import Password from '~/pages/settings/password'
 
-  export default {
-    name: 'settings-view',
-    layout: 'app',
-    components: {
-      'profile-view': Profile,
-      'password-view': Password
-    },
-    data () {
-      return {
-        busy: false
-      }
+export default {
+  name: 'SettingsView',
+  layout: 'app',
+  components: {
+    'profile-view': Profile,
+    'password-view': Password
+  },
+  data() {
+    return {
+      busy: false
     }
   }
+}
 </script>

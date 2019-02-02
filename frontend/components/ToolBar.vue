@@ -1,32 +1,44 @@
 <template>
-  <v-toolbar fixed app dark color="primary">
-    <v-toolbar-side-icon @click.stop="toggleDrawer" v-if="authenticated"></v-toolbar-side-icon>
+  <v-toolbar app>
+    <v-toolbar-side-icon v-if="authenticated" @click.stop="toggleDrawer" />
     <v-toolbar-title>
-      <router-link :to="{ name: 'welcome' }" class="white--text">
+      <router-link :to="{ name: 'index' }">
         {{ appName }}
       </router-link>
     </v-toolbar-title>
-    <v-spacer></v-spacer>
+    <v-spacer />
+
+    <locale-dropdown />
 
     <!-- Authenticated -->
     <template v-if="authenticated">
-
-      <v-btn flat :to="{ name: 'settings.profile' }">{{ user.name }}</v-btn>
-      <v-btn flat @click.prevent="logout">{{ $t('logout') }}</v-btn>
+      <v-btn flat :to="{ name: 'settings.profile' }">
+        {{ user.name }}
+      </v-btn>
+      <v-btn flat @click.prevent="logout">
+        {{ $t('logout') }}
+      </v-btn>
     </template>
 
     <!-- Guest -->
     <template v-else>
-      <v-btn flat :to="{ name: 'login' }">{{ $t('login') }}</v-btn>
-      <v-btn flat :to="{ name: 'register' }">{{ $t('register') }}</v-btn>
+      <v-btn flat :to="{ name: 'login' }">
+        {{ $t('login') }}
+      </v-btn>
+      <v-btn flat :to="{ name: 'register' }">
+        {{ $t('register') }}
+      </v-btn>
     </template>
   </v-toolbar>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-
+import LocaleDropdown from './LocaleDropdown'
 export default {
+  components: {
+    LocaleDropdown
+  },
   props: {
     drawer: {
       type: Boolean,
@@ -35,7 +47,7 @@ export default {
   },
 
   data: () => ({
-    appName: 'Bson',
+    appName: 'Laravel',
     busy: false
   }),
 
@@ -45,10 +57,10 @@ export default {
   }),
 
   methods: {
-    toggleDrawer () {
+    toggleDrawer() {
       this.$emit('toggleDrawer')
     },
-    async logout () {
+    async logout() {
       this.busy = true
 
       if (this.drawer) {
@@ -68,7 +80,7 @@ export default {
 
 <style lang="stylus" scoped>
 
-.toolbar__title .router-link-active
-  text-decoration: none
+    .toolbar__title .router-link-active
+        text-decoration: none
 
 </style>

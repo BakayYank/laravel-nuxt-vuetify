@@ -8,7 +8,7 @@ Vue.mixin({
     validator: 'new'
   },
   methods: {
-    async formHasErrors () {
+    async formHasErrors() {
       const valid = await this.$validator.validateAll()
       if (valid) {
         this.$validator.pause()

@@ -1,16 +1,15 @@
 <template>
-  <v-progress-linear 
-    :indeterminate="true" 
-    :color="color"
-    height="4" 
+  <v-progress-linear
     v-if="show"
-  >
-  </v-progress-linear>
+    :indeterminate="true"
+    :color="color"
+    height="4"
+  />
 </template>
 
 <script>
 export default {
-  name: 'progress-bar',
+  name: 'ProgressBar',
   props: {
     show: {
       type: [Boolean, String],

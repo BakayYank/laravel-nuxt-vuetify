@@ -18,14 +18,14 @@ export const getters = {
 
 // mutations
 export const mutations = {
-  SET_LOCALE (state, { locale }) {
+  SET_LOCALE(state, { locale }) {
     state.locale = locale
   }
 }
 
 // actions
 export const actions = {
-  setLocale ({ commit }, { locale }) {
+  setLocale({ commit }, { locale }) {
     commit('SET_LOCALE', { locale })
 
     Cookies.set('locale', locale, { expires: 365 })

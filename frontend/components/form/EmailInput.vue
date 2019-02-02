@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-text-field
+      v-model="_value"
       browser-autocomplete="current-password"
       :class="errorClass"
       :counter="counter"
@@ -10,9 +11,8 @@
       :name="name"
       :prepend-icon="prepend"
       type="email"
-      v-model="_value"
-    ></v-text-field>
-    <has-error :form="form" :field="name"></has-error> 
+    />
+    <has-error :form="form" :field="name" />
   </div>
 </template>
 
@@ -20,7 +20,7 @@
 import TextInput from './TextInput'
 
 export default {
-  extends: TextInput,
-  name: 'email-input'
+  name: 'EmailInput',
+  extends: TextInput
 }
 </script>
