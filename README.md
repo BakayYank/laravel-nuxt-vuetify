@@ -18,7 +18,7 @@
 - Cors with barryvdh/laravel-cors 
 
 ## Installation
-- `git clone`
+- `git clone https://github.com/BakayYank/laravel-nuxt-vuetify.git`
 
 #### Backend laravel api setup
 - `cd /backend`
