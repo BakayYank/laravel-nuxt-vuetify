@@ -4,7 +4,7 @@
 > A Laravel Nuxt Vuetify starter project template.
 
 <p align="center">
-<img src="https://i.imgur.com/NHFTsGt.png">
+<img src="https://i.imgur.com/iho38y3.png">
 </p>
 
 ## Features
